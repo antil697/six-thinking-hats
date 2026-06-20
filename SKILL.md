@@ -23,16 +23,20 @@ When this skill is invoked with a problem or question, follow these steps exactl
 
 Identify the core problem or decision from the user's message. If ambiguous, state your interpretation clearly before proceeding. Do not ask clarifying questions — make a reasonable interpretation and name it.
 
-### Step 2 — Spawn five hat agents in parallel
+### Step 2 — Spawn five hat agents in two batches
 
-Call the Agent tool **five times simultaneously** in a single response, one per hat. Each call must be fully self-contained — sub-agents have no conversation context. Use the agent prompt templates defined below, substituting `{{PROBLEM}}` with the actual problem statement.
+To avoid hitting API rate limits, spawn the hat agents in **two sequential batches**. Each batch runs its agents in parallel. Wait for all agents in a batch to complete before starting the next batch.
 
-Hats to spawn in parallel:
+**Batch A (3 agents in parallel):**
 - White Hat — facts and information gaps
-- Red Hat — emotions and gut reaction
 - Yellow Hat — benefits and optimism
 - Black Hat — risks and caution
+
+**Batch B (2 agents in parallel, after Batch A completes):**
+- Red Hat — emotions and gut reaction
 - Green Hat — creativity and alternatives
+
+Each call must be fully self-contained — sub-agents have no conversation context. Use the agent prompt templates defined below, substituting `{{PROBLEM}}` with the actual problem statement.
 
 ### Step 3 — Spawn the Blue Hat Chairman
 
@@ -195,5 +199,5 @@ The council has done the thinking. Your job is to decide.
 - Do not let Red Hat justify its feelings — gut reactions only, no analysis
 - Do not skip Black Hat to "stay positive" — it is the most commonly omitted and most valuable hat
 - Do not let the Chairman reopen analysis — synthesis and decision only, not a sixth round of thinking
-- Do not spawn hat agents sequentially — parallel execution is the architectural point of this skill
+- Do not spawn all five hat agents in a single burst — use two batches (3 then 2) to avoid API rate limit caps
 - Do not present the Chairman's output and hat outputs at equal visual weight — the recommendation leads
