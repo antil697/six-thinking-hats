@@ -1,8 +1,6 @@
 ---
 name: six-thinking-hats
 description: Skill council where five hat agents analyze a problem in parallel, then a Blue Hat chairman synthesizes their outputs into a final recommendation
-metadata:
-  mcpmarket-version: 2.0.0
 ---
 
 # Six Thinking Hats — Skill Council
