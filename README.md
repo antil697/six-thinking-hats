@@ -7,10 +7,11 @@ A Claude Code skill that applies Edward de Bono's Six Thinking Hats method as a 
 When invoked, the skill:
 
 1. Extracts the problem from your message
-2. Spawns five hat agents simultaneously via the Agent tool
-3. Collects all five reports
-4. Passes them to a Blue Hat chairman agent for synthesis
-5. Returns the chairman's recommendation followed by each hat's findings
+2. Asks you to identify key stakeholders before analysis begins
+3. Spawns five hat agents simultaneously via the Agent tool
+4. Collects all five reports
+5. Passes them to a Blue Hat chairman agent for synthesis
+6. Returns the chairman's recommendation as a React artifact, with hat reports collapsed below
 
 The five hats run in parallel — no hat sees another's output before forming its view.
 
@@ -19,7 +20,7 @@ The five hats run in parallel — no hat sees another's output before forming it
 | Hat | Role | Output |
 |-----|------|--------|
 | White | Facts and information gaps | What is known, what is missing, what questions to ask |
-| Red | Emotions and gut reaction | Instinctive response, feelings, intuitive signals |
+| Red | Stakeholder perspectives and human stakes | Emotional stances, hidden agendas, conflicts of interest, opposing voices |
 | Yellow | Benefits and optimism | Core benefits, best-case scenario, hidden upsides |
 | Black | Risks and caution | Critical risks (ranked), weaknesses, deal-breakers |
 | Green | Creativity and alternatives | Alternative approaches, reframes, unconventional ideas |
@@ -41,25 +42,18 @@ Install the skill, then invoke it with any decision or problem:
 /six-thinking-hats Our startup has been offered an acquisition at 4x revenue. Should we take it?
 ```
 
+The skill will pause to ask about stakeholders before convening the council. You can name specific groups (e.g. "engineering team, product manager, enterprise customers") or type `unknown` to let the council infer from context.
+
 The skill works best with decisions that have real stakes, genuine trade-offs, and more than one defensible answer.
 
 ## Output Structure
 
-```
-CHAIRMAN'S RECOMMENDATION
-  Convergence
-  Key Tensions
-  Recommendation        ← clear call, no hedging
-  Rationale
-  Next Actions
+The result renders as a React artifact:
 
-COUNCIL REPORTS
-  White Hat — Facts
-  Red Hat — Emotions
-  Yellow Hat — Benefits
-  Black Hat — Risks
-  Green Hat — Creativity
-```
+- **Chairman's verdict** — recommendation, convergence, key tensions, rationale, and next actions displayed prominently at the top
+- **Hat reports** — five colour-coded cards, collapsed by default, opened on demand
+
+If artifacts are unavailable, the skill falls back to structured markdown with the same ordering: recommendation first, then each hat's full report.
 
 ## When to Use
 
@@ -77,4 +71,5 @@ COUNCIL REPORTS
 ## Files
 
 - `SKILL.md` — skill definition, orchestration instructions, and all agent prompts
+- `assets/council-dashboard.jsx` — React component used to render council output
 - `README.md` — this file

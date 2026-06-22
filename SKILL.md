@@ -29,16 +29,14 @@ Before spawning any agents, ask the user:
 
 Wait for the user's response. Record it as `{{STAKEHOLDERS}}`. If the user provides nothing useful, note "No stakeholder context provided — council will infer from the problem." Do not proceed to Step 3 until you have a response.
 
-### Step 3 — Spawn five hat agents in two batches
+### Step 3 — Spawn all five hat agents in parallel
 
-To avoid hitting API rate limits, spawn the hat agents in **two sequential batches**. Each batch runs its agents in parallel. Wait for all agents in a batch to complete before starting the next batch.
+Spawn all five hat agents at once, running in parallel. Wait for all five to complete before proceeding to Step 4.
 
-**Batch A (3 agents in parallel):**
+**Five agents in parallel:**
 - White Hat — facts and information gaps
 - Yellow Hat — benefits and optimism
 - Black Hat — risks and caution
-
-**Batch B (2 agents in parallel, after Batch A completes):**
 - Red Hat — stakeholder perspectives and human stakes
 - Green Hat — creativity and alternatives
 
@@ -50,7 +48,42 @@ After all five agents complete, call the Agent tool once more with the Chairman 
 
 ### Step 5 — Present results
 
-Lead with the chairman's synthesis and recommendation. Follow with each hat's findings as supporting detail, clearly labeled.
+Render the result as a React artifact using the reference component in `assets/council-dashboard.jsx`. Do not invent a new layout each run — populate that component so output is consistent across invocations.
+
+Build a single `council` object and pass it to `<CouncilDashboard council={...} />`. The object must be shaped exactly as follows:
+
+```js
+council = {
+  problem:        string,    // one-line restatement of the decision
+  recommendation: string,    // the chairman's RECOMMENDATION, verbatim intent
+  convergence:    string,    // the chairman's CONVERGENCE
+  tensions:       string[],  // the chairman's KEY TENSIONS, one per item (2–3)
+  rationale:      string,    // the chairman's RATIONALE
+  nextActions:    string[],  // the chairman's NEXT ACTIONS, ordered (2–3)
+  hats: [                    // exactly five, in this order: white, red, yellow, black, green
+    {
+      key:     "white" | "red" | "yellow" | "black" | "green",
+      name:    string,       // e.g. "White Hat"
+      role:    string,       // e.g. "Facts"
+      summary: string,       // one-sentence distillation of this hat's report
+      sections: [            // this hat's labelled sections, verbatim from its output
+        { label: string, body: string }
+        // a section may instead carry per-group voices in place of a flat body:
+        //   { label: string, voices: [{ group: string, body: string }] }
+        // Red Hat uses this for OPPOSING VOICES — one entry per opposing group.
+      ]
+    }
+  ]
+}
+```
+
+Display rules the component already enforces — keep them when adapting it:
+- The chairman's verdict leads, in blue, at the top. The recommendation is the single most prominent element on the page.
+- The five hat reports sit below as colour-coded cards, **collapsed by default**, so the decision is read first and each perspective is opened on demand.
+- The hat colour mapping is fixed by the framework and must not be changed: white = facts, red = stakeholders, yellow = benefits, black = risks, green = creativity. Blue belongs to the chairman only.
+- `nextActions` is the only numbered list, because immediate steps are a genuine sequence. The hats are not a sequence — they are identified by colour, never numbered.
+
+If artifacts are unavailable in the current surface, fall back to structured markdown: recommendation first under a clear heading, then convergence, tensions, next actions and rationale, then each hat's full report under its own labelled subheading.
 
 ---
 
@@ -80,7 +113,7 @@ Do not evaluate, recommend, or express any opinion.
 
 ### Red Hat — Stakeholder Perspectives
 
-You are the Red Hat thinker in a Six Thinking Hats council. Your role is not emotional analysis — it is human stakes mapping. For each stakeholder group provided, identify what they stand to gain or lose, what they are likely feeling about this decision, what unstated agendas or biases they bring, and where their interests conflict with others. If no stakeholder context is provided, infer the most likely affected parties from the problem.
+You are the Red Hat thinker in a Six Thinking Hats council. Your role is human stakes mapping — and, where stakeholder groups are in genuine conflict, speaking in the emotional voice of each opposing side. For each stakeholder group provided, identify what they stand to gain or lose, what they are likely feeling about this decision, what unstated agendas or biases they bring, and where their interests conflict with others. If no stakeholder context is provided, infer the most likely affected parties from the problem.
 
 Problem: {{PROBLEM}}
 
@@ -92,7 +125,9 @@ STAKEHOLDER MAP — For each stakeholder group: their likely emotional stance (u
 
 HIDDEN AGENDAS — Unstated interests or biases each group is likely to bring to this decision that they may not voice openly.
 
-CONFLICTS OF INTEREST — Where stakeholder interests directly clash with each other or with the stated goal.
+CONFLICTS OF INTEREST — Where stakeholder interests directly clash with each other or with the stated goal. Name each distinct opposition as its own pairing (e.g. "Group A vs Group B"), so the opposing sides are clearly identified.
+
+OPPOSING VOICES — For each opposition named above, take on the emotional persona of each opposing group in turn and give feedback in that group's own voice: specific to that group, written from inside its stance and feeling, not a neutral third-party summary. Do not merge opposing groups into one blended view — each group speaks for itself, and its feedback must be distinct from the others'. Lead each with the group's name. If no groups are in genuine conflict, write "No opposing groups detected."
 
 WHOSE VOICE IS MISSING — Any affected party not represented in the stakeholder list who should be.
 
@@ -211,6 +246,7 @@ The council has done the thinking. Your job is to decide.
 - Do not let Red Hat drift into recommending or evaluating the decision — it maps human stakes only
 - Do not skip Black Hat to "stay positive" — it is the most commonly omitted and most valuable hat
 - Do not let the Chairman reopen analysis — synthesis and decision only, not a sixth round of thinking
-- Do not spawn all five hat agents in a single burst — use two batches (3 then 2) to avoid API rate limit caps
-- Do not present the Chairman's output and hat outputs at equal visual weight — the recommendation leads
+- Do not present the Chairman's output and hat outputs at equal visual weight — the recommendation leads, the hats are collapsed supporting detail
+- Do not number the five hats or reorder them by importance — they are identified by their fixed framework colours, not by rank
+- Do not improvise a fresh layout each run — populate the reference component so output stays consistent
 - Do not skip the stakeholder intake step — proceed to agents only after the user has responded
